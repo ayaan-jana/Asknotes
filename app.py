@@ -6,46 +6,54 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from streamlit_chat import message
+from datetime import datetime
 
 OPENAI_API_KEY = st.secrets['OPENAI_API_KEY']
 
 def initialize_log():
-  """
-  Initializes log message list
-  """
-  sst["log"] = [{
-    "status" : "info",
-    "message" : "Displaying background activity.."
-  }]
+    """Initializes log message list."""
+    sst["log"] = [{
+        "status": "info",
+        "message": "Displaying background activity.."
+    }]
 
-def display_log(logs:list):
-  """
-  Display a log message in the sidebar when `show_bts` is active.
 
-  Args:
-      logs (list): List of log messages
-  """
-  for log_msg in logs:
-    if log_msg.get('status') == "info":
-      sst.container.caption(f"{log_msg.get('message')}")
-    elif log_msg.get('status') == "success":
-      sst.container.caption(f":green[{log_msg.get('message')}]")
-    elif log_msg.get('status') == "error":
-      sst.container.caption(f":red[{log_msg.get('message')}]")
+def display_log(logs: list):
+    """
+    Display a log message in the sidebar when `show_bts` is active.
 
-def add_to_log(message:str, status="info"):
-  """Adds message to List of log messages
+    Args:
+        logs (list): List of log messages
+    """
+    if sst.show_bts and sst.container is not None:
+        for log_msg in logs:
+            if log_msg.get('status') == "info":
+                sst.container.caption(f"{log_msg.get('message')}")
+            elif log_msg.get('status') == "success":
+                sst.container.caption(f":green[{log_msg.get('message')}]")
+            elif log_msg.get('status') == "error":
+                sst.container.caption(f":red[{log_msg.get('message')}]")
 
-  Args:
-      message (str): log message
-      status (str, optional): "info", "success" or "error". Status of log message. Defaults to "info".
-  """
-  if sst.show_bts:
-    sst.log.append( {
-      "status" : status,
-      "message" : message
-    })
-    sst.container.caption(f":grey-background[{message}]")
+def add_to_log(message: str, status="info"):
+    """Adds message to List of log messages.
+
+    Args:
+        message (str): log message
+        status (str, optional): "info", "success" or "error". Status of log message. Defaults to "info".
+    """
+    # Check if `log` is already in session state; if not, initialize it
+    if "log" not in sst:
+        sst.log = []  # Initialize an empty list if it doesn't exist
+    log_entry = {
+        "status": status,
+        "message": message
+    }
+    sst.log.insert(0, log_entry)
+
+    # Only display the message if `show_bts` is enabled and container exists
+    if sst.show_bts and sst.container:
+        sst.container.caption(f":grey-background[{message}]")
+
     
 def initialize_chat_history():
   """
