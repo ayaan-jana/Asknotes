@@ -28,11 +28,11 @@ def display_log(logs: list):
     if sst.show_bts and sst.container is not None:
         for log_msg in logs:
             if log_msg.get('status') == "info":
-                sst.container.caption(f"{log_msg.get('message')}")
+                sst.container.caption(f" {log_msg.get('timestamp')} {log_msg.get('message')}")
             elif log_msg.get('status') == "success":
-                sst.container.caption(f":green[{log_msg.get('message')}]")
+                sst.container.caption(f"{log_msg.get('timestamp')} :green[{log_msg.get('message')}]")
             elif log_msg.get('status') == "error":
-                sst.container.caption(f":red[{log_msg.get('message')}]")
+                sst.container.caption(f"{log_msg.get('timestamp')} :red[{log_msg.get('message')}]")
 
 def add_to_log(message: str, status="info"):
     """Adds message to List of log messages.
@@ -44,15 +44,18 @@ def add_to_log(message: str, status="info"):
     # Check if `log` is already in session state; if not, initialize it
     if "log" not in sst:
         sst.log = []  # Initialize an empty list if it doesn't exist
+    
+    timestamp = datetime.now().strftime("%H:%M:%S")
     log_entry = {
-        "status": status,
-        "message": message
+      "timestamp": timestamp,
+      "status": status,
+      "message": message
     }
     sst.log.insert(0, log_entry)
 
     # Only display the message if `show_bts` is enabled and container exists
     if sst.show_bts and sst.container:
-        sst.container.caption(f":grey-background[{message}]")
+        sst.container.caption(f"[{timestamp}]:grey-background[{message}]")
 
     
 def initialize_chat_history():
